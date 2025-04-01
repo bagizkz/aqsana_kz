@@ -4,6 +4,7 @@
 
 {% block content %}
 <h2>Официальный курс обмена на сегодня без спреда</h2>
+
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
@@ -12,5 +13,42 @@
 
 {% if result %}
 <h3>Результат: {{ result }}</h3>
+
+{% if user.is_authenticated %}
+{% if form.cleaned_data.from_currency and form.cleaned_data.to_currency %}
+{% with from_code=form.cleaned_data.from_currency.code to_code=form.cleaned_data.to_currency.code %}
+{% with direction=from_code|add:"-"|add:to_code %}
+{% if direction in favorite_strings %}
+<p><a href="{% url 'remove_from_favorites' from_code to_code %}">
+        Удалить пару {{ from_code }} → {{ to_code }} из избранного
+    </a></p>
+{% else %}
+<p><a href="{% url 'add_to_favorites' from_code to_code %}">
+        Добавить пару {{ from_code }} → {{ to_code }} в избранное
+    </a></p>
+{% endif %}
+{% endwith %}
+{% endwith %}
+{% endif %}
+{% endif %}
+{% endif %}
+
+{% if user.is_authenticated %}
+<hr>
+<h3>Избранные пары</h3>
+{% if favorites %}
+<ul>
+    {% for fav in favorites %}
+    <li>
+        {{ fav.from_currency.code }} → {{ fav.to_currency.code }}
+        <a href="{% url 'remove_from_favorites' fav.from_currency.code fav.to_currency.code %}">
+            Удалить
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Нет избранных направлений.</p>
+{% endif %}
 {% endif %}
 {% endblock %}

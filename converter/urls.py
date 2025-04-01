@@ -1,7 +1,18 @@
 from django.urls import path
-from .views import convert_currency, conversion_history
+
+from . import views
 
 urlpatterns = [
-    path("", convert_currency, name="convert"),
-    path("history/", conversion_history, name="conversion_history"),
+    path("", views.convert_currency, name="convert"),
+    path("history/", views.conversion_history, name="conversion_history"),
+    path(
+        "favorite/add/<str:from_code>/<str:to_code>/",
+        views.add_to_favorites,
+        name="add_to_favorites",
+    ),
+    path(
+        "favorite/remove/<str:from_code>/<str:to_code>/",
+        views.remove_from_favorites,
+        name="remove_from_favorites",
+    ),
 ]
