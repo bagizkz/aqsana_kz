@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Конвертер{% endblock %}
+
+{% block content %}
+<h2>Конвертер валют</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Конвертировать</button>
+</form>
+
+{% if result %}
+<h3>Результат: {{ result }}</h3>
+{% endif %}
+{% endblock %}
