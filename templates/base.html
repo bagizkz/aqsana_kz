@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}AQSANA {% endblock %}</title>
+</head>
+
+<body>
+    <header>
+        <h1><a href="/">AQSANA.KZ</a></h1>
+        <hr>
+        <nav>
+
+            {% if user.is_authenticated %}
+            <p>Сәлеметсіз бе, {{ user.username }} | <a href="{% url 'conversion_history' %}">История</a> |
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Шыгу</button>
+            </form>
+
+            </p>
+            {% else %}
+            <a href="{% url 'login' %}">Кіру</a> |
+            <a href="{% url 'signup' %}">Тіркелу</a>
+            {% endif %}
+        </nav>
+        <hr>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p style="text-align:center;">&copy; 2025 AQSANA.KZ</p>
+    </footer>
+</body>
+
+</html>

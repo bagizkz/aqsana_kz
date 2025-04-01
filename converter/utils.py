@@ -11,7 +11,7 @@ def fetch_exchange_rates_from_nbk():
     response = requests.get(url)
 
     if response.status_code != 200:
-        print(f"❌ Ошибка при запросе НБК: {response.status_code}")
+        print(f"Т Ошибка при запросе НБК: {response.status_code}")
         return
 
     tree = ET.fromstring(response.content)
@@ -49,4 +49,4 @@ def fetch_exchange_rates_from_nbk():
         if created_flag:
             created += 1
 
-    print(f"- Курсы L НБК загружены. Добавлено {created} записей.")
+    print(f"Т Курсы НБК загружены. Добавлено {created}")

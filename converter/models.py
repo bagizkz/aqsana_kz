@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Currency(models.Model):
@@ -25,3 +26,16 @@ class ExchangeRate(models.Model):
 
     def __str__(self):
         return f"{self.base_currency.code} → {self.target_currency.code}: {self.rate}"
+
+
+#comv hist
+class ConversionHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=20, decimal_places=2)
+    from_currency = models.ForeignKey(Currency, on_delete=models.CASCADE, related_name='history_from')
+    to_currency = models.ForeignKey(Currency, on_delete=models.CASCADE, related_name='history_to')
+    converted_amount = models.DecimalField(max_digits=20, decimal_places=2)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}: {self.amount} {self.from_currency} → {self.to_currency} = {self.converted_amount}"
