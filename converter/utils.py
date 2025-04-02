@@ -18,7 +18,7 @@ def fetch_exchange_rates_from_nbk():
 
     # Создаём валюту KZT как базовую
     base_currency, _ = Currency.objects.get_or_create(
-        code="KZT", defaults={"name": "Казахстанский тенге", "symbol": "₸"}
+        code="KZT", defaults={"name": "Тенге", "symbol": "₸"}
     )
 
     created = 0

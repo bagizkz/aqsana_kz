@@ -1,20 +1,35 @@
 {% extends "base.html" %}
-
-{% block title %}История конвертаций{% endblock %}
+{% block title %}AQSANA — История{% endblock %}
 
 {% block content %}
-<h2>История ваших конвертаций</h2>
+
+<h2 class="text-center fw-semibold my-5">🕓 История конвертаций</h2>
 
 {% if history %}
-<ul>
+<div class="list-group shadow-sm">
     {% for item in history %}
-    <li>
-        {{ item.timestamp }}: {{ item.amount }} {{ item.from_currency.code }}
-        → {{ item.to_currency.code }} = {{ item.converted_amount }}
-    </li>
+    <div class="list-group-item py-4 px-4 d-flex justify-content-between align-items-start border-0 border-bottom">
+        <div>
+            <div class="fw-semibold fs-5">
+                {{ item.amount }} {{ item.from_currency.code }} →
+                {{ item.to_currency.code }}
+            </div>
+            <small class="text-muted">
+                {{ item.created_at|date:"d.m.Y H:i" }}
+            </small>
+        </div>
+        <div class="text-end">
+            <span class="fs-5 fw-bold text-success">
+                {{ item.converted_amount }} {{ item.to_currency.code }}
+            </span>
+        </div>
+    </div>
     {% endfor %}
-</ul>
+</div>
 {% else %}
-<p>История пуста.</p>
+<div class="alert alert-secondary text-center mt-5">
+    У вас пока нет истории конвертаций.
+</div>
 {% endif %}
+
 {% endblock %}

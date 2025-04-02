@@ -1,82 +1,104 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 
-{% block title %}Конвертер{% endblock %}
+{% block title %}AQSANA.KZ — Конвертер{% endblock %}
 
 {% block content %}
-<h2>Официальный курс обмена на сегодня без спреда</h2>
+<h2 class="text-center fw-semibold my-5">Официальный курс обмена</h2>
 
-
-<form method="post">
+<form method="post" novalidate class="mb-5">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Конвертировать</button>
+
+    <div class="row mb-4">
+        <div class="col-8">
+            <label class="form-label text-muted">Сумма</label>
+            {{ form.amount|add_class:"form-control form-control-lg rounded-3 border border-secondary-subtle" }}
+        </div>
+        <div class="col-4">
+            <label class="form-label text-muted">Из</label>
+            {{ form.from_currency|add_class:"form-select form-select-lg rounded-3 border border-secondary-subtle" }}
+
+        </div>
+    </div>
+
+    <div class="mb-5">
+        <label class="form-label text-muted">В</label>
+        {{ form.to_currency|add_class:"form-select form-select-lg rounded-3 border border-secondary-subtle" }}
+
+    </div>
+
+    <button type="submit" class="btn btn-dark w-100 py-3 fs-5">🔄 Конвертировать</button>
 </form>
 
+{% if form.non_field_errors %}
+<div class="alert alert-warning text-center">
+    {{ form.non_field_errors.0 }}
+</div>
+{% endif %}
+
+
+
 {% if result %}
-<h3>Результат: {{ result }}</h3>
+<div class="alert alert-light border-start border-5 border-success shadow-sm fs-5">
+    💰 <strong>Результат:</strong> {{ result }}
+</div>
+{% endif %}
 
-{% if prediction %}
-
-{% if user.is_authenticated %}
-{% if form.cleaned_data.from_currency and form.cleaned_data.to_currency %}
+{% if user.is_authenticated and form.cleaned_data.from_currency and form.cleaned_data.to_currency %}
 {% with from_code=form.cleaned_data.from_currency.code to_code=form.cleaned_data.to_currency.code %}
 {% with direction=from_code|add:"-"|add:to_code %}
-{% if direction in favorite_strings %}
-<p><a href="{% url 'remove_from_favorites' from_code to_code %}">
-        Удалить пару {{ from_code }} → {{ to_code }} из избранного
-    </a></p>
-{% else %}
-<p><a href="{% url 'add_to_favorites' from_code to_code %}">
-        Добавить пару {{ from_code }} → {{ to_code }} в избранное
-    </a></p>
-{% endif %}
+<div class="mt-4">
+    {% if direction in favorite_strings %}
+    <a href="{% url 'remove_from_favorites' from_code to_code %}" class="btn btn-outline-danger w-100">
+        ❌ Удалить {{ from_code }} → {{ to_code }} из избранного
+    </a>
+    {% else %}
+    <a href="{% url 'add_to_favorites' from_code to_code %}" class="btn btn-outline-secondary w-100">
+        ⭐ В избранное: {{ from_code }} → {{ to_code }}
+    </a>
+    {% endif %}
+</div>
 {% endwith %}
 {% endwith %}
 {% endif %}
-{% endif %}
-{% endif %}
-
-<hr>
-<h4>Прогноз курса KZT → USD на 7 дней:</h4>
-<ul>
-    {% for item in prediction %}
-    <li>{{ item.date }}: {{ item.rate }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
 
 {% if ai_forecast %}
-<hr>
-<h4>Прогноз от ИИ (GPT):</h4>
-<pre style="white-space: pre-wrap;">{{ ai_forecast }}</pre>
+<div class="mt-5">
+    <h5 class="text-muted mb-3">🤖 Прогноз от ИИ</h5>
+    <div class="bg-light p-4 rounded shadow-sm text-muted">{{ ai_forecast }}</div>
+</div>
 {% endif %}
 
-
-
-
-
+{% if prediction %}
+<div class="mt-5">
+    <h5 class="text-muted mb-3">📈 KZT → USD на 7 дней</h5>
+    <ul class="list-group list-group-flush">
+        {% for item in prediction %}
+        <li class="list-group-item d-flex justify-content-between px-0">
+            <span>{{ item.date }}</span>
+            <span class="fw-bold">{{ item.rate }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 
 {% if user.is_authenticated %}
-<hr>
-<h3>Избранные пары</h3>
-{% if favorites %}
-<ul>
-    {% for fav in favorites %}
-    <li>
-        {{ fav.from_currency.code }} → {{ fav.to_currency.code }}
-        <a href="{% url 'remove_from_favorites' fav.from_currency.code fav.to_currency.code %}">
-            Удалить
-        </a>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>Нет избранных направлений.</p>
+<div class="mt-5">
+    <h6 class="text-muted">⭐ Избранные направления</h6>
+    {% if favorites %}
+    <ul class="list-group list-group-flush">
+        {% for fav in favorites %}
+        <li class="list-group-item d-flex justify-content-between px-0">
+            {{ fav.from_currency.code }} → {{ fav.to_currency.code }}
+            <a class="btn btn-sm btn-link text-danger"
+                href="{% url 'remove_from_favorites' fav.from_currency.code fav.to_currency.code %}">Удалить</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">Нет избранных направлений.</p>
+    {% endif %}
+</div>
 {% endif %}
-{% endif %}
-
-
-
-
 {% endblock %}
