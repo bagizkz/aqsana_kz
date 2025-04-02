@@ -5,6 +5,7 @@
 {% block content %}
 <h2>Официальный курс обмена на сегодня без спреда</h2>
 
+
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
@@ -13,6 +14,8 @@
 
 {% if result %}
 <h3>Результат: {{ result }}</h3>
+
+{% if prediction %}
 
 {% if user.is_authenticated %}
 {% if form.cleaned_data.from_currency and form.cleaned_data.to_currency %}
@@ -33,6 +36,27 @@
 {% endif %}
 {% endif %}
 
+<hr>
+<h4>Прогноз курса KZT → USD на 7 дней:</h4>
+<ul>
+    {% for item in prediction %}
+    <li>{{ item.date }}: {{ item.rate }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+
+{% if ai_forecast %}
+<hr>
+<h4>Прогноз от ИИ (GPT):</h4>
+<pre style="white-space: pre-wrap;">{{ ai_forecast }}</pre>
+{% endif %}
+
+
+
+
+
+
 {% if user.is_authenticated %}
 <hr>
 <h3>Избранные пары</h3>
@@ -51,4 +75,8 @@
 <p>Нет избранных направлений.</p>
 {% endif %}
 {% endif %}
+
+
+
+
 {% endblock %}

@@ -48,5 +48,6 @@ def fetch_exchange_rates_from_nbk():
         )
         if created_flag:
             created += 1
-
+    print("----------------------\n")
     print(f"Т Курсы НБК загружены. Добавлено {created}")
+    print("----------------------\n")
