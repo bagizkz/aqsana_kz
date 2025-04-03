@@ -39,7 +39,7 @@ def fetch_exchange_rates_from_nbk():
             code=code, defaults={"name": code, "symbol": code}
         )
 
-        # Сохраняем курс KZT → target как есть
+
         _, created_flag = ExchangeRate.objects.get_or_create(
             base_currency=base_currency,
             target_currency=target_currency,

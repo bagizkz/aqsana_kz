@@ -13,7 +13,6 @@ from .models import (
     ExchangeRate,
     FavoriteConversionDirection,
 )
-from .predict import build_prediction
 from .utils import fetch_exchange_rates_from_nbk
 
 
@@ -28,14 +27,11 @@ def convert_currency(request):
     if request.method == "GET":
         default_from = Currency.objects.filter(code="KZT").first()
         default_to = Currency.objects.filter(code="USD").first()
-        form = ConverterForm(initial={
-            "from_currency": default_from,
-            "to_currency": default_to
-        })
+        form = ConverterForm(
+            initial={"from_currency": default_from, "to_currency": default_to}
+        )
     else:
         form = ConverterForm(request.POST)
-
-    fetch_exchange_rates_from_nbk()
 
     if request.method == "POST" and form.is_valid():
         amount = form.cleaned_data["amount"]
@@ -71,7 +67,9 @@ def convert_currency(request):
                         result = round(amount / reverse_rate, 2)
 
                 except ExchangeRate.DoesNotExist:
-                    print(f"Нет курса: {from_currency.code} → {to_currency.code} на {date.today()}")
+                    print(
+                        f"Нет курса: {from_currency.code} → {to_currency.code} на {date.today()}"
+                    )
                     result = "Курс не найден на сегодня"
 
         if request.user.is_authenticated and isinstance(result, (int, float, Decimal)):
@@ -83,6 +81,12 @@ def convert_currency(request):
                 converted_amount=Decimal(str(result)),
             )
 
+
+
+
+
+
+
         if from_currency.code == "KZT" and to_currency.code == "USD":
             qs = ExchangeRate.objects.filter(
                 base_currency=from_currency,
@@ -90,20 +94,23 @@ def convert_currency(request):
             ).order_by("date")
 
             if qs.count() >= 2:
-                data = [(rate.date, float(rate.rate)) for rate in qs]
-                prediction = build_prediction(data)
+                data = [
+                    (rate.date.strftime("%Y-%m-%d"), float(rate.rate)) for rate in qs
+                ]
+                short_data = [f"{d}: {r}" for d, r in data[-7:]]
 
-                short_data = [f"{d.strftime('%Y-%m-%d')}: {r}" for d, r in data]
                 prompt = (
                     f"На основе курса KZT к USD:\n"
                     + "\n".join(short_data)
-                    + "\nДай краткий прогноз на 7 дней. Только направление и тренд."
+                    + '\nДай прогноз курса на 7 дней вперёд. Верни только JSON в формате: [{"date": "YYYY-MM-DD", "rate": Число}]'
                 )
-                ai_forecast = generate_forecast(prompt)
+
+                prediction = generate_forecast(prompt)
 
     favorites = (
         FavoriteConversionDirection.objects.filter(user=request.user)
-        if request.user.is_authenticated else []
+        if request.user.is_authenticated
+        else []
     )
     favorite_strings = [
         f"{f.from_currency.code}-{f.to_currency.code}" for f in favorites
@@ -125,7 +132,9 @@ def convert_currency(request):
 
 @login_required
 def conversion_history(request):
-    history = ConversionHistory.objects.filter(user=request.user).order_by("-created_at")
+    history = ConversionHistory.objects.filter(user=request.user).order_by(
+        "-created_at"
+    )
     return render(request, "conversion_history.html", {"history": history})
 
 
@@ -134,9 +143,7 @@ def add_to_favorites(request, from_code, to_code):
     from_currency = get_object_or_404(Currency, code=from_code)
     to_currency = get_object_or_404(Currency, code=to_code)
     FavoriteConversionDirection.objects.get_or_create(
-        user=request.user,
-        from_currency=from_currency,
-        to_currency=to_currency
+        user=request.user, from_currency=from_currency, to_currency=to_currency
     )
     return redirect("convert")
 
@@ -146,8 +153,6 @@ def remove_from_favorites(request, from_code, to_code):
     from_currency = get_object_or_404(Currency, code=from_code)
     to_currency = get_object_or_404(Currency, code=to_code)
     FavoriteConversionDirection.objects.filter(
-        user=request.user,
-        from_currency=from_currency,
-        to_currency=to_currency
+        user=request.user, from_currency=from_currency, to_currency=to_currency
     ).delete()
     return redirect("convert")

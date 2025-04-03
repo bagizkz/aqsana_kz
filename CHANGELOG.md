@@ -1,6 +1,13 @@
 ## Changelog
 ---
 
+### 1.0
+- Удаление модели линейной регрессии:
+- Удалён predict.py и все связанное с линейной регрессией и прогнозами scikit-learn
+- Все прогнозы теперь генерируются с OpenAI GPT.
+
+---
+
 ### 0.7
 - Bootstrap
 - Обновлен дизайн сайта
@@ -13,7 +20,6 @@
 ### 0.6
 - Добавлены `Meta`-настройки для моделей: `Currency`, `ExchangeRate`, `ConversionHistory`, `FavoriteConversionDirection`.
 - В `ConversionHistory` обновлено поле `timestamp` → заменено на `created_at`.
-- `created_at` теперь фиксирует точное время каждой конвертации.
 
 ---
 

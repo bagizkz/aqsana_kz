@@ -4,11 +4,10 @@
 {% block title %}AQSANA.KZ — Конвертер{% endblock %}
 
 {% block content %}
-<h2 class="text-center fw-semibold my-5">Официальный курс обмена</h2>
+<h2 class="text-center fw-semibold my-5">Официальный курс обмена без спреда</h2>
 
 <form method="post" novalidate class="mb-5">
     {% csrf_token %}
-
     <div class="row mb-4">
         <div class="col-8">
             <label class="form-label text-muted">Сумма</label>
@@ -17,14 +16,12 @@
         <div class="col-4">
             <label class="form-label text-muted">Из</label>
             {{ form.from_currency|add_class:"form-select form-select-lg rounded-3 border border-secondary-subtle" }}
-
         </div>
     </div>
 
     <div class="mb-5">
         <label class="form-label text-muted">В</label>
         {{ form.to_currency|add_class:"form-select form-select-lg rounded-3 border border-secondary-subtle" }}
-
     </div>
 
     <button type="submit" class="btn btn-dark w-100 py-3 fs-5">🔄 Конвертировать</button>
@@ -36,11 +33,23 @@
 </div>
 {% endif %}
 
-
-
 {% if result %}
 <div class="alert alert-light border-start border-5 border-success shadow-sm fs-5">
     💰 <strong>Результат:</strong> {{ result }}
+</div>
+{% endif %}
+
+{% if prediction %}
+<div class="mt-5">
+    <h5 class="text-muted mb-3">📈 KZT → USD на 7 дней</h5>
+    <ul class="list-group list-group-flush">
+        {% for item in prediction %}
+        <li class="list-group-item d-flex justify-content-between px-0">
+            <span>{{ item.date }}</span>
+            <span class="fw-bold">{{ item.rate }}</span>
+        </li>
+        {% endfor %}
+    </ul>
 </div>
 {% endif %}
 
@@ -66,20 +75,6 @@
 <div class="mt-5">
     <h5 class="text-muted mb-3">🤖 Прогноз от ИИ</h5>
     <div class="bg-light p-4 rounded shadow-sm text-muted">{{ ai_forecast }}</div>
-</div>
-{% endif %}
-
-{% if prediction %}
-<div class="mt-5">
-    <h5 class="text-muted mb-3">📈 KZT → USD на 7 дней</h5>
-    <ul class="list-group list-group-flush">
-        {% for item in prediction %}
-        <li class="list-group-item d-flex justify-content-between px-0">
-            <span>{{ item.date }}</span>
-            <span class="fw-bold">{{ item.rate }}</span>
-        </li>
-        {% endfor %}
-    </ul>
 </div>
 {% endif %}
 
