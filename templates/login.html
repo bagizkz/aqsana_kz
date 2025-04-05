@@ -1,14 +1,20 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 
 {% block title %}Кіру{% endblock %}
 
 {% block content %}
-<h2>Кіру</h2>
+<h2 class="text-center fw-semibold my-5">Кіру</h2>
 
-<form method="post">
+<form method="post" class="mb-3">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Кіру</button>
+    {% for field in form %}
+    <div class="mb-3">
+        <label class="form-label">{{ field.label }}</label>
+        {{ field|add_class:"form-control rounded-3 border border-secondary-subtle" }}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-dark w-100 py-2 mt-3">Кіру</button>
 </form>
-<p>Аккаунтыңыз жоқ па? <a href="{% url 'signup' %}">Тіркелу</a></p>
+<p class="text-center">Аккаунт жоқ па? <a href="{% url 'signup' %}">Тіркелу</a></p>
 {% endblock %}

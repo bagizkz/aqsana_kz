@@ -3,6 +3,8 @@
 {% block title %}Шығу{% endblock %}
 
 {% block content %}
-<p>Сіз жүйеден сәтті шықтыңыз.</p>
-<p><a href="{% url 'login' %}">Қайта кіру</a></p>
+<div class="text-center my-5 py-5">
+    <h3 class="mb-4">Жүйеден шықтыңыз</h3>
+    <a href="{% url 'login' %}" class="btn btn-outline-dark">Қайта кіру</a>
+</div>
 {% endblock %}

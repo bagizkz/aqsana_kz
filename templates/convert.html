@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <div class="mb-5">
+    <div class="mb-4">
         <label class="form-label text-muted">В</label>
         {{ form.to_currency|add_class:"form-select form-select-lg rounded-3 border border-secondary-subtle" }}
     </div>
@@ -28,9 +28,7 @@
 </form>
 
 {% if form.non_field_errors %}
-<div class="alert alert-warning text-center">
-    {{ form.non_field_errors.0 }}
-</div>
+<div class="alert alert-warning text-center">{{ form.non_field_errors.0 }}</div>
 {% endif %}
 
 {% if result %}
@@ -73,7 +71,7 @@
 
 {% if ai_forecast %}
 <div class="mt-5">
-    <h5 class="text-muted mb-3">🤖 Прогноз от ИИ</h5>
+    <h5 class="text-muted mb-3">🤖 Прогноз от GPT</h5>
     <div class="bg-light p-4 rounded shadow-sm text-muted">{{ ai_forecast }}</div>
 </div>
 {% endif %}
