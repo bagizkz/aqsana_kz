@@ -4,27 +4,27 @@
 {% block title %}AQSANA.KZ — Конвертер{% endblock %}
 
 {% block content %}
-<h2 class="text-center fw-semibold my-5">Официальный курс обмена без спреда</h2>
+<h2 class="text-center fw-semibold my-5">Ресми айырбастау бағамы. Спредсіз</h2>
 
 <form method="post" novalidate class="mb-5">
     {% csrf_token %}
     <div class="row mb-4">
         <div class="col-8">
-            <label class="form-label text-muted">Сумма</label>
+            <label class="form-label text-muted">Сома</label>
             {{ form.amount|add_class:"form-control form-control-lg rounded-3 border border-secondary-subtle" }}
         </div>
         <div class="col-4">
-            <label class="form-label text-muted">Из</label>
+            <label class="form-label text-muted">Валютадан</label>
             {{ form.from_currency|add_class:"form-select form-select-lg rounded-3 border border-secondary-subtle" }}
         </div>
     </div>
 
     <div class="mb-4">
-        <label class="form-label text-muted">В</label>
+        <label class="form-label text-muted">Валютаға</label>
         {{ form.to_currency|add_class:"form-select form-select-lg rounded-3 border border-secondary-subtle" }}
     </div>
 
-    <button type="submit" class="btn btn-dark w-100 py-3 fs-5">🔄 Конвертировать</button>
+    <button type="submit" class="btn btn-dark w-100 py-3 fs-5">🔄 Айырбастау</button>
 </form>
 
 {% if form.non_field_errors %}
@@ -33,13 +33,13 @@
 
 {% if result %}
 <div class="alert alert-light border-start border-5 border-success shadow-sm fs-5">
-    💰 <strong>Результат:</strong> {{ result }}
+    💰 <strong>Нәтиже:</strong> {{ result }}
 </div>
 {% endif %}
 
 {% if prediction %}
 <div class="mt-5">
-    <h5 class="text-muted mb-3">📈 KZT → USD на 7 дней</h5>
+    <h5 class="text-muted mb-3">📈 KZT → USD 7 күнге болжамы:</h5>
     <ul class="list-group list-group-flush">
         {% for item in prediction %}
         <li class="list-group-item d-flex justify-content-between px-0">
@@ -57,11 +57,11 @@
 <div class="mt-4">
     {% if direction in favorite_strings %}
     <a href="{% url 'remove_from_favorites' from_code to_code %}" class="btn btn-outline-danger w-100">
-        ❌ Удалить {{ from_code }} → {{ to_code }} из избранного
+        ❌ Таңдаулылардан өшіру: {{ from_code }} → {{ to_code }}
     </a>
     {% else %}
     <a href="{% url 'add_to_favorites' from_code to_code %}" class="btn btn-outline-secondary w-100">
-        ⭐ В избранное: {{ from_code }} → {{ to_code }}
+        ⭐ Таңдаулыға қосу: {{ from_code }} → {{ to_code }}
     </a>
     {% endif %}
 </div>
@@ -69,28 +69,28 @@
 {% endwith %}
 {% endif %}
 
-{% if ai_forecast %}
+<!-- {% if ai_forecast %}
 <div class="mt-5">
-    <h5 class="text-muted mb-3">🤖 Прогноз от GPT</h5>
+    <h5 class="text-muted mb-3">🤖 GPT болжамы</h5>
     <div class="bg-light p-4 rounded shadow-sm text-muted">{{ ai_forecast }}</div>
 </div>
-{% endif %}
+{% endif %} -->
 
 {% if user.is_authenticated %}
 <div class="mt-5">
-    <h6 class="text-muted">⭐ Избранные направления</h6>
+    <h6 class="text-muted">⭐ Таңдаулы бағыттар</h6>
     {% if favorites %}
     <ul class="list-group list-group-flush">
         {% for fav in favorites %}
         <li class="list-group-item d-flex justify-content-between px-0">
             {{ fav.from_currency.code }} → {{ fav.to_currency.code }}
             <a class="btn btn-sm btn-link text-danger"
-                href="{% url 'remove_from_favorites' fav.from_currency.code fav.to_currency.code %}">Удалить</a>
+                href="{% url 'remove_from_favorites' fav.from_currency.code fav.to_currency.code %}">Өшіру</a>
         </li>
         {% endfor %}
     </ul>
     {% else %}
-    <p class="text-muted">Нет избранных направлений.</p>
+    <p class="text-muted">Таңдаулы бағыттар жоқ.</p>
     {% endif %}
 </div>
 {% endif %}

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}AQSANA — История{% endblock %}
+{% block title %}AQSANA — Тарихы{% endblock %}
 
 {% block content %}
 
-<h2 class="text-center fw-semibold my-5">🕓 История конвертаций</h2>
+<h2 class="text-center fw-semibold my-5">🕓 Айырбастау тарихы</h2>
 
 {% if history %}
 <div class="list-group shadow-sm">
@@ -19,7 +19,7 @@
     {% endfor %}
 </div>
 {% else %}
-<div class="alert alert-secondary text-center mt-5">У вас пока нет истории конвертаций.</div>
+<div class="alert alert-secondary text-center mt-5">Сізде әзірге айырбастау тарихы жоқ.</div>
 {% endif %}
 
 {% endblock %}

@@ -18,7 +18,7 @@
             <div>
                 {% if user.is_authenticated %}
                 <span class="me-2">Сәлеметсіз бе, {{ user.username }}</span>
-                <a href="{% url 'conversion_history' %}" class="btn btn-link">История</a>
+                <a href="{% url 'conversion_history' %}" class="btn btn-link">Айырбастау тарихы</a>
                 <form method="post" action="{% url 'logout' %}" class="d-inline">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-link text-danger">Шығу</button>

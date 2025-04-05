@@ -75,7 +75,7 @@ def convert_currency(request):
                     )
 
                 except ExchangeRate.DoesNotExist:
-                    result = "Курс не найден на сегодня"
+                    result = "Бүгінге валюта бағамы жоқ"
 
         # сохраняемв историю
         if request.user.is_authenticated and isinstance(result, (int, float, Decimal)):
@@ -99,14 +99,21 @@ def convert_currency(request):
                     (rate.date.strftime("%Y-%m-%d"), float(rate.rate)) for rate in qs
                 ]
                 short_data = [f"{d}: {r}" for d, r in data[-7:]]
-
                 prompt = (
-                    "На основе курса KZT к USD:\n"
+                    "Given the following KZT to USD exchange rate data:\n"
                     + "\n".join(short_data)
-                    + "\nДай прогноз курса на 7 дней вперёд. "
-                    + "Верни только JSON в формате: "
-                    + '[{"date": "YYYY-MM-DD", "rate": Число}]'
+                    + "\nPredict the exchange rate for the next 7 days. "
+                    + "Respond with **only** a JSON array in this format: "
+                    + '[{"date": "YYYY-MM-DD", "rate": number}]'
                 )
+
+                # prompt = (
+                #     "На основе курса KZT к USD:\n"
+                #     + "\n".join(short_data)
+                #     + "\nДай прогноз курса на 7 дней вперёд. "
+                #     + "Верни только JSON в формате: "
+                #     + '[{"date": "YYYY-MM-DD", "rate": Число}]'
+                # )
 
                 prediction = generate_forecast(prompt)
 
