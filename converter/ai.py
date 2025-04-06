@@ -10,43 +10,35 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def generate_forecast(prompt: str) -> list:
-    """
-    Генерирует прогноз курса валют используя GPT-3.5-turbo.
-
-    Args:
-        prompt: Запрос для модели GPT
-
-    Returns:
-        list: Прогнозы в формате списка словарей
-    """
-    logger.debug("Отправка запроса к GPT API")
+    """Генерирует прогноз курса валют через GPT-3.5-turbo."""
+    logger.info(f"🔶 PROMPT 🔶 {prompt}")
 
     try:
-        response = client.chat.completions.create(
+        resp = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200,
-            temperature=0.3,
+            temperature=0.2,
         )
+        content = resp.choices[0].message.content.strip()
+        logger.info(f"🔷 RESPONSE 🔷 {content}")
 
-        content = response.choices[0].message.content.strip()
-
-        # Извлекаем JSON из ответа
+        # Extract JSON
         start = content.find("[")
         end = content.rfind("]") + 1
+        json_str = content[start:end] if start >= 0 and end > 0 else ""
 
-        if start == -1 or end == 0:
-            logger.error("Не найден JSON в ответе GPT")
+        if not json_str:
+            logger.error("❌ JSON не найден")
             return []
 
-        json_str = content[start:end]
+        result = json.loads(json_str)
+        logger.info(f"✅ FORECAST ✅ {result}")
+        return result
 
-        try:
-            return json.loads(json_str)
-        except json.JSONDecodeError as e:
-            logger.error(f"Ошибка при разборе JSON от GPT: {e}")
-            return []
-
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ JSON ошибка: {e}")
+        return []
     except Exception as e:
-        logger.error(f"Ошибка при запросе к OpenAI API: {e}")
+        logger.error(f"❌ API ошибка: {e}")
         return []

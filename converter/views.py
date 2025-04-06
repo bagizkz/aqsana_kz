@@ -25,97 +25,12 @@ def convert_currency(request):
     fetch_exchange_rates_from_nbk()
 
     # Настройка формы
-    if request.method == "GET":
-        default_from = Currency.objects.filter(code="KZT").first()
-        default_to = Currency.objects.filter(code="USD").first()
-        form = ConverterForm(
-            initial={"from_currency": default_from, "to_currency": default_to}
-        )
-    else:
-        form = ConverterForm(request.POST)
+    defaults = {"KZT": "USD"} if request.method == "GET" else None
+    form = setup_form(request, defaults)
 
     # Обработка конвертации
     if request.method == "POST" and form.is_valid():
-        amount = form.cleaned_data["amount"]
-        from_currency = form.cleaned_data["from_currency"]
-        to_currency = form.cleaned_data["to_currency"]
-
-        if from_currency == to_currency:
-            result = amount
-        else:
-            try:
-                # ПИшем прямой курс
-                rate = ExchangeRate.objects.get(
-                    base_currency=from_currency,
-                    target_currency=to_currency,
-                    date=date.today(),
-                ).rate
-
-                # вычисление с тернарным оператором
-                is_kzt_base = from_currency.code == "KZT"
-                result = round(amount / rate if is_kzt_base else amount * rate, 2)
-
-            except ExchangeRate.DoesNotExist:
-                try:
-                    # ишем обратный курс
-                    reverse_rate = ExchangeRate.objects.get(
-                        base_currency=to_currency,
-                        target_currency=from_currency,
-                        date=date.today(),
-                    ).rate
-
-                    is_kzt_target = to_currency.code == "KZT"
-                    result = round(
-                        (
-                            amount * reverse_rate
-                            if is_kzt_target
-                            else amount / reverse_rate
-                        ),
-                        2,
-                    )
-
-                except ExchangeRate.DoesNotExist:
-                    result = "Бүгінге валюта бағамы жоқ"
-
-        # сохраняемв историю
-        if request.user.is_authenticated and isinstance(result, (int, float, Decimal)):
-            ConversionHistory.objects.create(
-                user=request.user,
-                amount=Decimal(str(amount)),
-                from_currency=from_currency,
-                to_currency=to_currency,
-                converted_amount=Decimal(str(result)),
-            )
-
-        # генерируем прогноз
-        if from_currency.code == "KZT" and to_currency.code == "USD":
-            qs = ExchangeRate.objects.filter(
-                base_currency=from_currency,
-                target_currency=to_currency,
-            ).order_by("date")
-
-            if qs.count() >= 2:
-                data = [
-                    (rate.date.strftime("%Y-%m-%d"), float(rate.rate)) for rate in qs
-                ]
-                short_data = [f"{d}: {r}" for d, r in data[-7:]]
-                prompt = (
-                    "Given the following KZT to USD exchange rate data:\n"
-                    + "\n".join(short_data)
-                    + "\nPredict the exchange rate for the next 7 days. "
-                    + "Respond with **only** a JSON array in this format: "
-                    + '[{"date": "YYYY-MM-DD", "rate": number}]'
-                )
-
-                # prompt = (
-                #     "На основе курса KZT к USD:\n"
-                #     + "\n".join(short_data)
-                #     + "\nДай прогноз курса на 7 дней вперёд. "
-                #     + "Верни только JSON в формате: "
-                #     + '[{"date": "YYYY-MM-DD", "rate": Число}]'
-                # )
-
-                prediction = generate_forecast(prompt)
+        result, prediction = process_conversion(request, form)
 
     # Получение избранных
     favorites = (
@@ -138,6 +53,100 @@ def convert_currency(request):
             "prediction": prediction,
         },
     )
+
+
+def setup_form(request, defaults=None):
+    """Настраивает форму конвертера."""
+    if defaults:
+        default_from = Currency.objects.filter(code="KZT").first()
+        default_to = Currency.objects.filter(code="USD").first()
+        return ConverterForm(
+            initial={"from_currency": default_from, "to_currency": default_to}
+        )
+    return ConverterForm(request.POST)
+
+
+def process_conversion(request, form):
+    """Обрабатывает запрос на конвертацию валюты."""
+    amount = form.cleaned_data["amount"]
+    from_currency = form.cleaned_data["from_currency"]
+    to_currency = form.cleaned_data["to_currency"]
+    prediction = []
+
+    # Конвертация
+    if from_currency == to_currency:
+        result = amount
+    else:
+        result = convert_amount(from_currency, to_currency, amount)
+
+    # Сохранение в историю
+    if request.user.is_authenticated and isinstance(result, (int, float, Decimal)):
+        ConversionHistory.objects.create(
+            user=request.user,
+            amount=Decimal(str(amount)),
+            from_currency=from_currency,
+            to_currency=to_currency,
+            converted_amount=Decimal(str(result)),
+        )
+
+    # Генерация прогноза
+    if from_currency.code == "KZT" and to_currency.code == "USD":
+        prediction = generate_rate_prediction(from_currency, to_currency)
+
+    return result, prediction
+
+
+def convert_amount(from_currency, to_currency, amount):
+    """Конвертирует сумму из одной валюты в другую."""
+    try:
+        # Ищем прямой курс
+        rate = ExchangeRate.objects.get(
+            base_currency=from_currency,
+            target_currency=to_currency,
+            date=date.today(),
+        ).rate
+
+        is_kzt_base = from_currency.code == "KZT"
+        return round(amount / rate if is_kzt_base else amount * rate, 2)
+
+    except ExchangeRate.DoesNotExist:
+        try:
+            # Ищем обратный курс
+            reverse_rate = ExchangeRate.objects.get(
+                base_currency=to_currency,
+                target_currency=from_currency,
+                date=date.today(),
+            ).rate
+
+            is_kzt_target = to_currency.code == "KZT"
+            return round(
+                amount * reverse_rate if is_kzt_target else amount / reverse_rate, 2
+            )
+
+        except ExchangeRate.DoesNotExist:
+            return "Бүгінге валюта бағамы жоқ"
+
+
+def generate_rate_prediction(from_currency, to_currency):
+    """Генерирует прогноз курса на неделю вперед."""
+    qs = ExchangeRate.objects.filter(
+        base_currency=from_currency,
+        target_currency=to_currency,
+    ).order_by("date")
+
+    if qs.count() < 2:
+        return []
+
+    data = [(rate.date.strftime("%Y-%m-%d"), float(rate.rate)) for rate in qs]
+    short_data = [f"{d}: {r}" for d, r in data[-7:]]
+
+    prompt = (
+        f"KZT-USD rates: {', '.join(short_data)}\n"
+        "Predict next 7 days rates. Return only JSON: "
+        '[{"date":"YYYY-MM-DD","rate":number}]'
+    )
+
+    return generate_forecast(prompt)
 
 
 @login_required

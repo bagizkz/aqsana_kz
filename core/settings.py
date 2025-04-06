@@ -92,17 +92,12 @@ DATABASES = {
 }
 
 
-
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "LOCATION": "unique-snowflake",
     }
 }
-
-
-
-
 
 
 LOGGING = {
@@ -116,7 +111,7 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "level": "INFO",
+            "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
@@ -129,7 +124,7 @@ LOGGING = {
         },
         "converter": {
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": False,
         },
     },
