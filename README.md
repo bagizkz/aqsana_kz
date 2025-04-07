@@ -1,15 +1,13 @@
 #### AQSANA.KZ
 
 **AQSANA.KZ** — интеллектуальный конвертер валют с интеграцией ИИ
-
 ---
-#### Почему AQSANA?
 
-> **Название "AQSANA"** образовано от двух казахских слов:  
-> **"Ақша"** (деньги) и **"Сана"** (разум, подсчёт).  
-> 
-> **Философия проекта:**  
-> Считай с умом. Обменивай с разумом.
+- **Презентация проекта:**  
+  [Google Slides](https://docs.google.com/presentation/d/1fvkmz6HDyg-QNFauIBFre1EOTktcxvLv/edit?usp=sharing&ouid=100964327532800505352&rtpof=true&sd=true)
+
+- **Видео-демо (YouTube):**  
+  [YouTube](https://youtu.be/brOQKK_Z3Ug)
 
 ---
 
@@ -38,6 +36,6 @@
 
 История изменений [CHANGELOG.md](./CHANGELOG.md).
 
-Текущая версия: **1.4**
+Текущая версия: **1.6**
 
 ---
